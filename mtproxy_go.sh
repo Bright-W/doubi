@@ -99,6 +99,7 @@ Download(){
 	else
 		[[ -e "${mtproxy_file}" ]] && rm -rf "${mtproxy_file}"
 	fi
+	[[ ! -e ${mtg_conf} ]] && wget --no-check-certificate "https://raw.githubusercontent.com/Bright-W/doubi/master/other/mtg.config.toml" 
 	if [[ ${bit} == "x86_64" ]]; then
 		bit="amd64"
 	elif [[ ${bit} == "i386" || ${bit} == "i686" ]]; then
