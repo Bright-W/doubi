@@ -15,7 +15,8 @@
 NAME="MTProxy"
 NAME_BIN="./mtg "
 FILE="/usr/local/mtproxy-go"
-CONF="/usr/local/mtproxy-go/mtproxy.conf"
+# CONF="/usr/local/mtproxy-go/mtproxy.conf"
+MTGConf="/usr/local/mtproxy-go/mtg.config.toml"
 LOG="/usr/local/mtproxy-go/mtproxy.log"
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
@@ -31,32 +32,32 @@ check_running(){
 		return 1
 	fi
 }
-read_config(){
-	[[ ! -e ${CONF} ]] && echo -e "${Error} $NAME 配置文件不存在 !" && exit 1
-	port=$(cat ${CONF}|grep 'PORT = '|awk -F 'PORT = ' '{print $NF}')
-	password=$(cat ${CONF}|grep 'PASSWORD = '|awk -F 'PASSWORD = ' '{print $NF}')
-	tag=$(cat ${CONF}|grep 'TAG = '|awk -F 'TAG = ' '{print $NF}')
-	nat_ipv4=$(cat ${CONF}|grep 'NAT-IPv4 = '|awk -F 'NAT-IPv4 = ' '{print $NF}')
-	nat_ipv6=$(cat ${CONF}|grep 'NAT-IPv6 = '|awk -F 'NAT-IPv6 = ' '{print $NF}')
-	secure=$(cat ${CONF}|grep 'SECURE = '|awk -F 'SECURE = ' '{print $NF}')
-	[[ ! -z "${nat_ipv4}" ]] && nat_ipv4="-4 \"${nat_ipv4}:${port}\""
-	[[ ! -z "${nat_ipv6}" ]] && nat_ipv6="-6 \"${nat_ipv6}:${port}\""
-	if [[ "${secure}" == "YES" ]]; then
-		secure="-s"
-	else
-		secure=""
-	fi
-}
+# read_config(){
+# 	[[ ! -e ${CONF} ]] && echo -e "${Error} $NAME 配置文件不存在 !" && exit 1
+# 	port=$(cat ${CONF}|grep 'PORT = '|awk -F 'PORT = ' '{print $NF}')
+# 	password=$(cat ${CONF}|grep 'PASSWORD = '|awk -F 'PASSWORD = ' '{print $NF}')
+# 	tag=$(cat ${CONF}|grep 'TAG = '|awk -F 'TAG = ' '{print $NF}')
+# 	nat_ipv4=$(cat ${CONF}|grep 'NAT-IPv4 = '|awk -F 'NAT-IPv4 = ' '{print $NF}')
+# 	nat_ipv6=$(cat ${CONF}|grep 'NAT-IPv6 = '|awk -F 'NAT-IPv6 = ' '{print $NF}')
+# 	secure=$(cat ${CONF}|grep 'SECURE = '|awk -F 'SECURE = ' '{print $NF}')
+# 	[[ ! -z "${nat_ipv4}" ]] && nat_ipv4="-4 \"${nat_ipv4}:${port}\""
+# 	[[ ! -z "${nat_ipv6}" ]] && nat_ipv6="-6 \"${nat_ipv6}:${port}\""
+# 	if [[ "${secure}" == "YES" ]]; then
+# 		secure="-s"
+# 	else
+# 		secure=""
+# 	fi
+# }
 do_start(){
 	check_running
 	if [[ $? -eq 0 ]]; then
 		echo -e "${Info} $NAME (PID ${PID}) 正在运行..." && exit 0
 	else
-		read_config
+		# read_config
 		cd ${FILE}
 		echo -e "${Info} $NAME 启动中..."
 		ulimit -n 51200
-		eval nohup ./mtg run -b 0.0.0.0:${port} $(echo ${nat_ipv4}) $(echo ${nat_ipv6}) -t 127.0.0.1:65436 "${password}" "${tag}" >> "${LOG}" 2>&1 &
+		eval nohup ./mtg run ${MTGConf} >> "${LOG}" 2>&1 &
 		sleep 2s
 		check_running
 		if [[ $? -eq 0 ]]; then
