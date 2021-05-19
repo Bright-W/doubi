@@ -5,12 +5,12 @@ export PATH
 #=================================================
 #	System Required: CentOS/Debian/Ubuntu
 #	Description: MTProxy Golang
-#	Version: 2.0.0
+#	Version: 2.0.1
 #	Author: Toyo
 #	Blog: https://doub.io/shell-jc9/
 #=================================================
 
-sh_ver="2.0.0"
+sh_ver="2.0.1"
 filepath=$(cd "$(dirname "$0")"; pwd)
 file_1=$(echo -e "${filepath}"|awk -F "$0" '{print $1}')
 file="/usr/local/mtproxy-go"
@@ -83,10 +83,10 @@ check_ver_comparison(){
 		if [[ $yn == [Yy] ]]; then
 			check_pid
 			[[ ! -z $PID ]] && kill -9 ${PID}
-			\cp "${mtproxy_conf}" "/tmp/mtproxy.conf"
-			rm -rf ${file}
+			#\cp "${mtproxy_conf}" "/tmp/mtproxy.conf"
+			#rm -rf ${file}
 			Download
-			mv "/tmp/mtproxy.conf" "${mtproxy_conf}"
+			#mv "/tmp/mtproxy.conf" "${mtproxy_conf}"
 			Start
 		fi
 	else
@@ -108,18 +108,21 @@ Download(){
 	else
 		bit="arm"
 	fi
-	wget --no-check-certificate -N "https://github.com/9seconds/mtg/releases/download/${new_ver}/mtg-linux-${bit}"
-	[[ ! -e "mtg-linux-${bit}" ]] && echo -e "${Error} MTProxy 下载失败 !" && rm -rf "${file}" && exit 1
-	mv "mtg-linux-${bit}" "mtg"
-	[[ ! -e "mtg" ]] && echo -e "${Error} MTProxy 重命名失败 !" && rm -rf "${file}" && exit 1
+	wget --no-check-certificate -N "https://github.com/9seconds/mtg/releases/download/${new_ver}/mtg-${new_ver:1}-linux-${bit}.tar.gz"
+	[[ ! -e "mtg-${new_ver:1}-linux-${bit}.tar.gz" ]] && echo -e "${Error} MTProxy 下载失败 !" && rm -rf "${mtproxy_file}" && exit 1
+	tar -xzf "mtg-${new_ver:1}-linux-${bit}.tar.gz"
+	mv "mtg-${new_ver:1}-linux-${bit}/mtg" "mtg"
+	rm -rf "mtg-${new_ver:1}-linux-${bit}.tar.gz" && rm -rf "mtg-${new_ver:1}-linux-${bit}"	
+	[[ ! -e "mtg" ]] && echo -e "${Error} MTProxy 重命名失败 !" && rm -rf "${mtproxy_file}" && exit 1
 	chmod +x mtg
+	rm -rf "${Now_ver_File}"
 	echo "${new_ver}" > ${Now_ver_File}
 }
 Service(){
 	if [[ ${release} = "centos" ]]; then
 		if ! wget --no-check-certificate "https://raw.githubusercontent.com/Bright-W/doubi/master/service/mtproxy_go_centos" -O /etc/init.d/mtproxy-go; then
 			echo -e "${Error} MTProxy服务 管理脚本下载失败 !"
-			rm -rf "${file}"
+			#rm -rf "${file}"
 			exit 1
 		fi
 		chmod +x "/etc/init.d/mtproxy-go"
@@ -128,7 +131,7 @@ Service(){
 	else
 		if ! wget --no-check-certificate "https://raw.githubusercontent.com/Bright-W/doubi/master/service/mtproxy_go_debian" -O /etc/init.d/mtproxy-go; then
 			echo -e "${Error} MTProxy服务 管理脚本下载失败 !"
-			rm -rf "${file}"
+			#rm -rf "${file}"
 			exit 1
 		fi
 		chmod +x "/etc/init.d/mtproxy-go"
